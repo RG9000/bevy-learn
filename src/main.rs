@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::sprite::collide_aabb;
+use std::fs;
 
 const IMAGE_SIZE:Vec2 = Vec2::new(16.0,16.0);
 const IMAGE_SIZE_F: f32 = 16.0;
@@ -10,7 +11,8 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_startup_system(spawn_camera)
     .add_startup_system(spawn_player)
-    .add_startup_system(spawn_floor)
+    .add_startup_system(spawn_world)
+    //.add_startup_system(spawn_floor)
     .add_system(player_movement)
     .run();
 }
@@ -41,6 +43,39 @@ pub fn spawn_floor (
             FloorTile {}
         )
     );
+
+}
+
+pub fn spawn_world(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+){
+    let level = fs::read_to_string("test_level.txt").expect("level file not found");
+    let mut x = 0.0;
+    let mut y = 0.0;
+    for c in level.chars() {
+        if c == '\n' {
+            y+=1.0;
+            x=0.0;
+        }
+        else {
+            x+=1.0;
+        }
+        if c == 'x'{
+            commands.spawn(
+            (
+                SpriteBundle {
+                    transform: Transform::from_xyz(x*16.0 ,y*16.0 , 0.0),
+                    texture: asset_server.load("sprites/floor.png"),
+                    ..default()
+                },
+                FloorTile {}
+            ));
+
+        }
+
+
+    }
 
 }
 
